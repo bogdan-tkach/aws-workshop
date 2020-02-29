@@ -1,5 +1,6 @@
-const removeAllApis = require('./cleaup-api-gateway');
-const removeAllDatabases = require('./cleanup-dynamo-db');
+const removeAllApis = require('./scripts/clean-up-api-gateway');
+const removeAllDatabases = require('./scripts/clean-up-dynamo-db');
+const terminateAllEC2 = require('./scripts/clean-up-ec2');
 
 // Load the SDK and UUID
 var AWS = require('aws-sdk');
@@ -30,5 +31,6 @@ regions.forEach(region => {
     
     removeAllApis(AWS);
     removeAllDatabases(AWS);
+    terminateAllEC2(AWS);
 })
 
