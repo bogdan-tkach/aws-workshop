@@ -7,7 +7,9 @@ then
 fi
 
 case "$1" in
-'package-lambda') aws2 cloudformation package --template workshop-template-original.yaml \
+'package-lambda')
+mkdir -p build
+aws2 cloudformation package --template workshop-template-original.yaml \
 --s3-bucket btkach-cloud-formation-playground > build/workshop-template-packaged.yaml
 ;;
 'create-stack') aws2 cloudformation create-stack --stack-name dynamo-test --template-body file://build/workshop-template-packaged.yaml \
