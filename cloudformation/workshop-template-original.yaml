@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  TableName:
+    Type: String
+    Default: Employees
+    Description: The name of table to use by Lambda
+Resources:
+  TestDatabase:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      KeySchema:
+        - AttributeName: Id
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: Id
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      Tags:
+        - Key: createdBy
+          Value: !Ref AWS::AccountId
+        - Key: purpose
+          Value: cloudfoundry-workout
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: Role for lambda microservices
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Tags:
+        - Key: createdBy
+          Value: !Ref AWS::AccountId
+        - Key: purpose
+          Value: cloudfoundry-workout
+  Lambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Role: !GetAtt
+          - LambdaRole
+          - Arn
+      Code: "../lambda-node-js"
+  APIGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: "api-by-cloud-formation"
+      Tags:
+        - Key: createdBy
+          Value: !Ref AWS::AccountId
+        - Key: purpose
+          Value: cloudfoundry-workout
+  APIGatewayProxyResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref APIGatewayRestApi
+      ParentId: !GetAtt
+        - APIGatewayRestApi
+        - RootResourceId
+      PathPart: '{proxy+}'
+  APIGatewayProxyResourceMethodANY:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      RestApiId: !Ref APIGatewayRestApi
+      ResourceId: !Ref APIGatewayProxyResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda.Arn}/invocations
+  APIGatewayLambdaInvocationPermision:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref Lambda
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGatewayRestApi}/*/*/*
