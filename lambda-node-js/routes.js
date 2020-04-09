@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const express = require('express');
 const uuid = require('uuid');
-const EMPLOYEES_TABLE = process.env.TABLE;
+const TABLE_NAME = process.env.TABLE_NAME;
 const DYNAMO_REGION = process.env.DYNAMO_REGION;
 AWS.config.update({
     region: DYNAMO_REGION
@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/employees', async (req, res) => {
     console.log('get all method called');
         const params = {
-            TableName: EMPLOYEES_TABLE
+            TableName: TABLE_NAME
         };
         try {
             let result = await dynamoDb.scan(params).promise();
@@ -31,7 +31,7 @@ router.get('/employees/:id', async (req, res) => {
     console.log('get by id method called');
     const id = req.params.id;
     const params = {
-        TableName: EMPLOYEES_TABLE,
+        TableName: TABLE_NAME,
         Key: {
             id
         }
@@ -51,7 +51,7 @@ router.post('/employees', async (req, res) => {
     const name = req.body.name;
     const id = uuid.v4();
     const params = {
-        TableName: EMPLOYEES_TABLE,
+        TableName: TABLE_NAME,
         Item: {
             id,
             name
@@ -70,7 +70,7 @@ router.delete('/employees/:id', async (req, res) => {
     console.log('delete method called');
     const id = req.params.id;
     const params = {
-        TableName: EMPLOYEES_TABLE,
+        TableName: TABLE_NAME,
         Key: {
             id
         }
@@ -90,7 +90,7 @@ router.put('/employees', async (req, res) => {
     const id = req.body.id;
     const name = req.body.name;
     const params = {
-        TableName: EMPLOYEES_TABLE,
+        TableName: TABLE_NAME,
         Key: {
             id
         },

@@ -15,10 +15,10 @@ Resources:
     Properties:
       TableName: !Ref TableName
       KeySchema:
-        - AttributeName: Id
+        - AttributeName: id
           KeyType: HASH
       AttributeDefinitions:
-        - AttributeName: Id
+        - AttributeName: id
           AttributeType: S
       ProvisionedThroughput:
         ReadCapacityUnits: 1
@@ -58,8 +58,8 @@ Resources:
       Code: "../lambda-node-js"
       Environment:
         Variables:
-          DYNAMO_REGION : ${AWS::Region}
-          EMPLOYEES_TABLE : !Ref TableName
+          DYNAMO_REGION : !Ref AWS::Region
+          TABLE_NAME : !Ref TableName
   APIGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
