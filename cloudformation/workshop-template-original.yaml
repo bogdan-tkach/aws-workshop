@@ -41,6 +41,7 @@ Resources:
       Description: Role for lambda microservices
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
       Tags:
         - Key: createdBy
           Value: !Ref AWS::AccountId
@@ -55,6 +56,10 @@ Resources:
         - LambdaRole
         - Arn
       Code: "../lambda-node-js"
+      Environment:
+        Variables:
+          DYNAMO_REGION : ${AWS::Region}
+          EMPLOYEES_TABLE : !Ref TableName
   APIGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
