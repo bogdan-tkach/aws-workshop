@@ -5,24 +5,30 @@ const EMPLOYEES_TABLE = process.env.TABLE;
 const DYNAMO_REGION = process.env.DYNAMO_REGION;
 AWS.config.update({
     region: DYNAMO_REGION
-  })
+})
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 const router = express.Router();
 
-router.get('/employees', (req, res) => {
-    const params = {
-        TableName: EMPLOYEES_TABLE
-    };
-    dynamoDb.scan(params, (error, result) => {
-        if (error) {
-            res.status(400).json({ error: 'Error fetching the employees' });
+router.get('/employees', async (req, res) => {
+    console.log('get all method called');
+        const params = {
+            TableName: EMPLOYEES_TABLE
+        };
+        try {
+            let result = await dynamoDb.scan(params).promise();
+            console.log('result from dynamo:', result);
+            res.json(result != null ? result.Items : {message: 'Response from Dynamo is null'});
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({error: 'Error fetching the employees'});
         }
-        console.log(result);
-        res.json(result.Items);
-    });
-});
-router.get('/employees/:id', (req, res) => {
+    }
+);
+
+
+router.get('/employees/:id', async (req, res) => {
+    console.log('get by id method called');
     const id = req.params.id;
     const params = {
         TableName: EMPLOYEES_TABLE,
@@ -30,18 +36,18 @@ router.get('/employees/:id', (req, res) => {
             id
         }
     };
-    dynamoDb.get(params, (error, result) => {
-        if (error) {
-            res.status(400).json({ error: 'Error retrieving Employee' });
-        }
-        if (result.Item) {
-            res.json(result.Item);
-        } else {
-            res.status(404).json({ error: `Employee with id: ${id} not found` });
-        }
-    });
+    try {
+        let result = await dynamoDb.get(params).promise();
+        console.log('result from dynamo:', result);
+        res.json(result != null ? result.Item : {message: 'Response from Dynamo is null'});
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({error: 'Error retrieving the employees'});
+    }
 });
-router.post('/employees', (req, res) => {
+
+router.post('/employees', async (req, res) => {
+    console.log('post method called');
     const name = req.body.name;
     const id = uuid.v4();
     const params = {
@@ -51,17 +57,17 @@ router.post('/employees', (req, res) => {
             name
         },
     };
-    dynamoDb.put(params, (error) => {
-        if (error) {
-            res.status(400).json({ error: 'Could not create Employee' });
-        }
-        res.json({
-            id,
-            name
-        });
-    });
+    try {
+        let result = await dynamoDb.put(params).promise();
+        console.log('result from dynamo:', result);
+        res.json({id, name});
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({error: 'Could not create Employee'});
+    }
 });
-router.delete('/employees/:id', (req, res) => {
+router.delete('/employees/:id', async (req, res) => {
+    console.log('delete method called');
     const id = req.params.id;
     const params = {
         TableName: EMPLOYEES_TABLE,
@@ -69,14 +75,18 @@ router.delete('/employees/:id', (req, res) => {
             id
         }
     };
-    dynamoDb.delete(params, (error) => {
-        if (error) {
-            res.status(400).json({ error: 'Could not delete Employee' });
-        }
-        res.json({ success: true });
-    });
+    try {
+        let result = await dynamoDb.delete(params).promise();
+        console.log('result from dynamo:', result);
+        res.json({success: true});
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({error: 'Could not delete Employee'});
+    }
 });
-router.put('/employees', (req, res) => {
+
+router.put('/employees', async (req, res) => {
+    console.log('put method called');
     const id = req.body.id;
     const name = req.body.name;
     const params = {
@@ -85,15 +95,17 @@ router.put('/employees', (req, res) => {
             id
         },
         UpdateExpression: 'set #name = :name',
-        ExpressionAttributeNames: { '#name': 'name' },
-        ExpressionAttributeValues: { ':name': name },
+        ExpressionAttributeNames: {'#name': 'name'},
+        ExpressionAttributeValues: {':name': name},
         ReturnValues: "ALL_NEW"
-    }
-    dynamoDb.update(params, (error, result) => {
-        if (error) {
-            res.status(400).json({ error: 'Could not update Employee' });
-        }
+    };
+    try {
+        let result = await dynamoDb.update(params).promise();
+        console.log('result from dynamo:', result);
         res.json(result.Attributes);
-    })
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({error: 'Could not update Employee'});
+    }
 });
 module.exports = router;

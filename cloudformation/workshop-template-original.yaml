@@ -5,6 +5,10 @@ Parameters:
     Type: String
     Default: Employees
     Description: The name of table to use by Lambda
+  StageName:
+    Type: String
+    Default: dev
+    Description: Stage to deploy api to
 Resources:
   TestDatabase:
     Type: AWS::DynamoDB::Table
@@ -48,8 +52,8 @@ Resources:
       Handler: index.handler
       Runtime: nodejs12.x
       Role: !GetAtt
-          - LambdaRole
-          - Arn
+        - LambdaRole
+        - Arn
       Code: "../lambda-node-js"
   APIGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
@@ -86,3 +90,21 @@ Resources:
       FunctionName: !Ref Lambda
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGatewayRestApi}/*/*/*
+  DevStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: !Ref StageName
+      Description: Dev Stage
+      RestApiId: !Ref APIGatewayRestApi
+      DeploymentId: !Ref DevDeployment
+  DevDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: [APIGatewayProxyResourceMethodANY]
+    Properties:
+      RestApiId: !Ref APIGatewayRestApi
+      Description: Cloudformation deployment
+Outputs:
+  APIDomainName:
+    Value: !Sub '${APIGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com'
+  APIDomainNameWithStage:
+    Value: !Sub '${APIGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${DevStage}'
