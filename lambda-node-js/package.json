@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha tests/* --timeout 10000",
     "deploy": "aws2 lambda update-function-code --function-name workshop-lambda --zip-file fileb://build.zip --publish",
     "build": "zip -r build.zip node_modules index.js app.js routes.js"
   },
@@ -16,5 +16,11 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^7.1.1",
+    "node-fetch": "^2.6.0"
   }
 }
