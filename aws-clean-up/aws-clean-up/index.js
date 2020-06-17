@@ -6,6 +6,7 @@ const terminateAllEC2 = require('./scripts/clean-up-ec2');
 var AWS = require('aws-sdk');
 
 let regions = [
+    'ap-east-1',
     'eu-north-1',
     'ap-south-1',
     'eu-west-3',

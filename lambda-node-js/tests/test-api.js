@@ -6,9 +6,10 @@ const sleep = require('util').promisify(setTimeout);
 chai.use(chaiHttp);
 const expect = chai.expect;
 
-const url = `https://${process.env.ENDPOINT}`;
+const url = `https://kq9ndr46c8.execute-api.ap-east-1.amazonaws.com/dev`;
 describe('employee api', () => {
     it('should create/update/delete an employee', async () => {
+        console.log('url:', url);
         let id = await chai.request(url)
             .post('/employees')
             .send({

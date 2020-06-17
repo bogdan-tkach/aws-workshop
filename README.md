@@ -1,6 +1,22 @@
 # aws-workshop
 Code examples for workshop 
 
+## Creating users 
+
+Use script user-management/users.sh to create several users for workshop based on list in trainee.list file 
+
+``
+user-management/users.sh create_users
+``
+
+Know issues: 
+- last user in the list might not be created properly (probably due to EOL symbols or something)
+
+## Testing endpoint
+
+Once participant provided a link to his API endpoint, use lambda-node-js/tests/test-api.js file to test it
+Make sure to set mocha timeout: --timeout 10000
+
 
 ## AWS clean up 
 

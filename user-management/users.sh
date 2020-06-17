@@ -1,12 +1,8 @@
 #!/bin/bash
-#make sure to set up AWS CLI profile
-profile_to_use='bogdan_tkach@epam.com'
+#make sure to set up AWS CLI
 group_name='Trainees'
 user_name=$2
 
-export AWS_PROFILE=$profile_to_use
-
-echo 'using profile '$AWS_PROFILE
 
 function create_user() {
   echo 'creating user '$user_name
